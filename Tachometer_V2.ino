@@ -1,7 +1,19 @@
+#include <Button2.h>
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
+#define BUTTON_PIN D3
 
 LiquidCrystal_I2C lcd(0x27,16,2);
+Button2 button;
+
+/* Dejar en el loop solamente el button.loop para que se este verificando constantemente en que modo se esta
+ * desglosar los modos en diferentes funciones para llamar a estas luego de cada modo
+ * 3 modos: VELOCIDAD, CONTEO DE OBJETOS, EL TERCERO ESPERAR A QUE VENGA ADRIANO
+ * SETEAR EL MODO DE VELOCIDAD CUANDO SE OPRIME EL BOTON UNA VEZ
+ * SETEAR EL MODO DE CONTEO DE OBJETOS CUANDO SE OPRIME EL BOTON DOS VECES
+ * 
+ */
+
 
 const byte sensor = 2;
 
@@ -26,13 +38,23 @@ void setup() {
   lcd.print("INITIALIZING");
   delay(1000);
   lcd.clear();
-  
+  button.begin(BUTTON_PIN);
+  button.setClickHandler(MODO_RPM);
+  button.setDoubleClickHandler(MODO_COUNT);
   pinMode(sensor, INPUT);
   attachInterrupt(digitalPinToInterrupt(sensor), ISR_sensor, RISING);
 }
 
+
+
 void loop() { 
-   
+
+  button.loop();
+     
+}
+
+void MODO_RPM(Button2& b){
+
    noInterrupts();
    t_pulse_started = t_pulse_started_volatile;
    t_pulse_duration = t_pulse_duration_volatile;
@@ -67,15 +89,23 @@ void loop() {
          rpm_sum = 0;
          n = 0;
          
-       }
-       
+       } 
      }
-   
    }
-updatedisplay();  
+lcd_rpm();
+  
+  }
+
+void MODO_COUNT(Button2& b){
+//DESARROLLO DEL MODO CONTADOR
+     
+
+
+lcd_count();
+  
 }
 
-void updatedisplay() {
+void lcd_rpm() {
 
   byte x = 0;
   
@@ -108,9 +138,9 @@ void updatedisplay() {
     Serial.print(rpm_average);
     Serial.print("\n");
     //lcd.setTextSize(1);
-    lcd.setCursor(x, 0);
+    lcd.setCursor(13, 0);
     lcd.print("RPM");
-    //delay(100);
+    delay(100);
     //lcd.display();
   
   } else {
@@ -125,11 +155,18 @@ void updatedisplay() {
   }
 }
 
+void lcd_count(){
+
+  //DESARROLLO DEL LCD CDO ESTA EN MODO CONTADOR
+
+  
+}
+
 void ISR_sensor() {
- 
-  t_pulse_duration_volatile = micros() - t_pulse_started_volatile;
-  t_pulse_started_volatile = micros();
-  timeout = 0;
-  newpulse = 1;
- 
+
+    t_pulse_duration_volatile = micros() - t_pulse_started_volatile;
+    t_pulse_started_volatile = micros();
+    timeout = 0;
+    newpulse = 1;
+
 }

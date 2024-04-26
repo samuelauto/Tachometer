@@ -1,0 +1,6 @@
+{
+    "board": "arduino:avr:uno",
+    "programmer": "arduinoasisp",
+    "port": "COM16",
+    "sketch": "Laser_Tachometer_V1_0_0.ino"
+}
